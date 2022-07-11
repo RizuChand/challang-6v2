@@ -9,18 +9,8 @@ app.use(express.urlencoded({ extended: true }))
 
 
 app.get('/', (req, res) => {
-  res.render('home.ejs')
+  res.render('register')
 })
-
-
-app.get("/login", (req, res) => {
-  res.render("login");
-})
-
-
-// app.get("/register", (req, res) => {
-//   res.render("register");
-// })
 
 
 app.get("/register/bio/:id", (req, res) => {
@@ -37,12 +27,13 @@ app.get("/data", (req, res) => {
   )
   .then(user => {
     const data = user[0].dataValues;
-    res.render("data",{user});
-    res.send(user);
-    console.log(data);
+    if (data !== undefined) {
+     res.render("data",{user});  
+    }else{
+      res.send("tidak ada data apapun disini !!!")
+   }
   })
 })
-
 
 app.post("/register/bio/:id", (req, res) => {
   console.log("masuk", req.body);
@@ -59,7 +50,6 @@ app.post("/register/bio/:id", (req, res) => {
   })
 })
 
-
 app.post("/register", (req, res) => {
   const {username, password } = req.body;
   user_game.create({
@@ -69,7 +59,6 @@ app.post("/register", (req, res) => {
     res.redirect(`/register/bio/${data.id}`);
   })
 })
-
 
 app.get("/user/:id/delete", (req, res) =>{
  const id = req.params.id;
@@ -89,6 +78,26 @@ app.post("/user/:id/edit", (req, res) =>{
     username,password,
   },  {where : {id}})
   .then(data => {
+    res.redirect(`/update/bio/${data.id}`);
+  })
+})
+
+app.get("/update/bio/:id", (req, res) => {
+  const user_id = req.params.id;
+  res.render("formUpdate",{user_id});
+})
+
+app.post("/update/bio/:id", (req, res) => {
+  console.log("masuk", req.body);
+  const {firstname, lastname, birthplace } = req.body;
+  const user_id = req.params.id;
+  user_game_biodata.update({
+    firstname,
+    lastname,
+    birthplace,
+    user_id 
+  })
+  .then(data => {
     res.redirect('/data');
   })
 })
@@ -98,7 +107,6 @@ app.get('/user/:id/edit', (req, res) => {
   const id = req.params.id;
   res.render('edit',{id})
 })
-
 
 app.listen(port, () => {
   console.log(`test server bro ${port}`)
